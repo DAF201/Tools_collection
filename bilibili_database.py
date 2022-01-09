@@ -1,3 +1,4 @@
+#can be used as free image host
 import requests
 URL = 'https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs'
 send_headers = {
@@ -7,10 +8,10 @@ send_headers = {
     "Accept-Language": "zh-CN,zh;q=0.8"}
 
 param = {
-    'csrf': '746f3ef49f165606acfa964d2e2888f5'#b_jet
+    'csrf': ''#b_jet
 }
 cookie = {
-    'SESSDATA': '6af072ae%2C1655664419%2C2cca8%2Ac1'
+    'SESSDATA': ''
 }
 re = requests.post(url=URL, headers=send_headers,
                    params=param, cookies=cookie, files={'file_up': open(r'C:\Users\16418\Desktop\something\something.jpg', 'rb'), 'category': 'daily'}).text
