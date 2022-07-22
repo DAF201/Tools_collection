@@ -1,3 +1,4 @@
+#fetch sender info
 import request
 cid: str
 character: str
