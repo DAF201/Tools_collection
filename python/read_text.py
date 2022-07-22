@@ -1,3 +1,5 @@
+#read text out
+
 import playsound
 import requests
 text: str
