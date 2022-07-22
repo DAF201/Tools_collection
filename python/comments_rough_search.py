@@ -1,3 +1,4 @@
+#search bilibili comments of an account via name
 from googlesearch import search; import time, json
 print("enter a username to continue")
 user_input = input(); data = []
