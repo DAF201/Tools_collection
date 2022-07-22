@@ -1,3 +1,4 @@
+#faster factors
 def factors(num):
     def is_prime(x):
         if (x == 2) or (x == 3):
