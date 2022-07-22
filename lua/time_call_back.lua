@@ -1,3 +1,4 @@
+--prototype, don't work on crank
 counter = 0
 time_counter = 0
 start_time = os.date('%S')
