@@ -2,4 +2,4 @@
 
 ~~personal collection of some tools of others~~
 
-reminder, my member got worse those years
+reminder, my memory got worse those years
