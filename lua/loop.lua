@@ -1,12 +1,33 @@
 local loop = {}
 local task_detail = {}
+local request_inprocess = {}
 
-looper_execution_counter = 0
+local looper_execution_counter = 0
+
+task_timeout = 10
+
 
 function looper()
     looper_execution_counter = looper_execution_counter + 1
 
     if #loop == 0 then print("loop empty") return end
+
+    if string.find(loop[1], "modbus_request_%d%d%d%d%d") then
+        if request_inprocess[loop[1]] == nil then
+            request_inprocess[loop[1]] = looper_execution_counter + task_timeout
+        else
+            if request_inprocess[loop[1]] < looper_execution_counter then
+                print("request time out: " .. loop[1])
+                request_inprocess[loop[1]] = nil
+                remove_from_loop(loop[1])
+                return
+            else
+                loop[#loop + 1] = loop[1]
+                table.remove(loop, 1)
+                return
+            end
+        end
+    end
 
     local task_repeat  = task_detail[loop[1]][1] -- type: 0 repeatedly, 1 one time
     local func_pointer = task_detail[loop[1]][2] -- just the function
@@ -54,43 +75,4 @@ function remove_from_loop(id)
             task_detail[v] = nil
         end
     end
-end
-
-function dump(o)
-    if type(o) == 'table' then
-        local s = '{ '
-        for k, v in pairs(o) do
-            if type(k) ~= 'number' then
-                k = '"' .. k .. '"'
-            end
-            s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
-        end
-        return s .. '} '
-    else
-        return tostring(o)
-    end
-end
-
-append_to_loop("print1", 0, print, 1, 2, 3, 4, 5)
-append_to_loop("print2", 0, print, 6, 7, 8, 9, 0)
-append_to_loop("print3", 1, print, 11, 12, 13, 14, 15)
-
-while true do
-    looper()
-    if looper_execution_counter > 10 then
-        remove_from_loop("print1")
-    end
-
-    if looper_execution_counter > 10 then
-        remove_from_loop("print2")
-    end
-
-    if looper_execution_counter > 10 then
-        remove_from_loop("print3")
-    end
-
-    if looper_execution_counter > 4 then
-        append_to_loop("print4", 1, print, 16, 17, 18, 19, 20)
-    end
-    os.execute("powershell sleep 1")
 end
