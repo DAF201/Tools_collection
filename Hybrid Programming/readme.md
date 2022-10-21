@@ -1,1 +1,0 @@
-c use c++ function
