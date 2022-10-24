@@ -1,3 +1,3 @@
 for linux only...
 
-as a test for CPP lib -> C also
+as a test for CPP lib -> C lib also
