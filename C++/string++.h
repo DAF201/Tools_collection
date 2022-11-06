@@ -1,3 +1,5 @@
+#ifndef STRING_PLUS_PLUS_H
+#define STRING_PLUS_PLUS_H
 #include <vector>
 #include <string>
 #include <cstring>
@@ -8,6 +10,9 @@
 #include <typeinfo>
 #include <fstream>
 #include <type_traits>
+
+#define STRING_NO_FOUND -1
+
 using namespace std;
 
 // for all string thing I may need in the future
@@ -44,6 +49,49 @@ str_vec str_split_by_space(string input)
     }
     result.push_back(temp);
     return result;
+}
+
+typedef vector<string> str_vec;
+str_vec str_split_space(string input, int repeat_times)
+{
+    string temp = "";
+    int counter = 0;
+    str_vec result;
+
+    if (NULL == strstr(input.c_str(), " "))
+    {
+        result.push_back(input);
+        return result;
+    }
+
+    for (int i = 0; i < input.size(); i++)
+    {
+        if (counter > repeat_times)
+        {
+            return result;
+        }
+
+        if (input[i] == ' ' && counter < repeat_times)
+        {
+            counter++;
+            result.push_back(temp);
+            temp = "";
+        }
+        else
+        {
+            temp += input[i];
+        }
+    }
+
+    if (temp != "")
+    {
+        result.push_back(temp);
+        return result;
+    }
+    else
+    {
+        return result;
+    }
 }
 
 // split by char
@@ -125,6 +173,72 @@ void rm_sub(char *main_str, const char *sub_str)
     strcpy(main_str, str_main.c_str());
 }
 
+// extract the text between tags, same input type
+template <typename TEXT>
+string tag_extractor(TEXT source, TEXT tag)
+{
+    string str_source = string(source);
+    string str_tag = string(tag);
+    string no_found = "";
+
+    if (str_source.size() < str_tag.size())
+    {
+        return no_found;
+    }
+
+    int head = -1;
+    int tail = -1;
+
+    head = str_source.find(str_tag);
+    tail = str_source.find(str_tag, head + str_tag.size());
+
+    if (head == -1 || tail == -1)
+    {
+        return no_found;
+    }
+
+    return str_source.substr(head + str_tag.size(), tail - head - str_tag.size());
+}
+
+// extract the first text between tags, different input type
+template <typename TEXT_TYPE_1, typename TEXT_TYPE_2>
+string tag_extractor(TEXT_TYPE_1 source, TEXT_TYPE_2 tag)
+{
+    string str_source = string(source);
+    string str_tag = string(tag);
+    string no_found = "";
+
+    if (str_source.size() < str_tag.size())
+    {
+        return no_found;
+    }
+
+    int head = -1;
+    int tail = -1;
+
+    head = str_source.find(str_tag);
+    tail = str_source.find(str_tag, head + str_tag.size());
+
+    if (head == -1 || tail == -1)
+    {
+        return no_found;
+    }
+
+    return str_source.substr(head + str_tag.size(), tail - head - str_tag.size());
+}
+
+// Does not include the last \0
+template <typename TEXT>
+unsigned int text_size(TEXT input_char)
+{
+    int counter = 0;
+    while (input_char[counter] != '\0' && counter != 2147483647)
+    {
+        counter++;
+    }
+    return counter;
+}
+
 // int is sub, for example 1 is a sub of 12 or 11...
 bool is_sub(int &main_source, int &sub_source)
 {
@@ -143,132 +257,42 @@ bool is_sub(int &main_source, int &sub_source)
     }
 }
 
-// just for pratice purpose, and then I realize is will be just easier to use overwrite incase I am not make container or so
-
-//  string is sub
-template <typename T>
-bool is_sub(T &main_source, T &sub_source)
+// same type TEXT compare
+template <typename TEXT>
+bool is_sub(TEXT main, TEXT sub)
 {
-    if (is_same_v<T, string>)
+    if (text_size(main) < text_size(sub))
     {
-        if (NULL != strstr(main_source.c_str(), sub_source.c_str()))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
-}
 
-// cstring is sub
-template <typename T>
-bool is_sub(T &&main_source, T &&sub_source)
-{
-
-    if (is_same_v<T, const char *>)
-    {
-        if (NULL != strstr(main_source, sub_source))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-// string then cstring is sub
-template <typename T1, typename T2>
-bool is_sub(T1 &main_source, T2 &&sub_source)
-{
-    if (is_same_v<T1, string> && is_same_v<T2, const char *>)
-    {
-        if (NULL != strstr(main_source.c_str(), sub_source))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-// cstring then string is sub
-template <typename T1, typename T2>
-bool is_sub(T1 &&main_source, T2 &sub_source)
-{
-    if (is_same_v<T1, const char *> && is_same_v<T2, string>)
-    {
-        if (NULL != strstr(main_source, sub_source.c_str()))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-// ----
-
-// files
-
-bool file_exist(const char *filename)
-{
-    ifstream file(filename);
-    return file.good();
-}
-namespace binary_file
-{
-    // this name "BYTE" comflict with something in std
-    typedef char BYTE;
-
-    vector<BYTE> read_binary_file(const char *filename)
-    {
-        try
-        {
-            streampos fileSize;
-            ifstream file(filename, ios::binary);
-            file.seekg(0, ios::end);
-            fileSize = file.tellg();
-            file.seekg(0, ios::beg);
-            vector<BYTE> fileData(fileSize);
-            file.read((char *)&fileData[0], fileSize);
-            file.close();
-            return fileData;
-        }
-        catch (...)
-        {
-            vector<BYTE> __NULL_vector;
-            __NULL_vector.push_back('\0');
-            return __NULL_vector;
-        }
-    }
-}
-
-string read_text_file(const char *filename)
-{
     try
     {
-        fstream file;
-        string buffer;
-        string res = "";
-        file.open(filename);
-        while (!file.eof())
-        {
-            getline(file, buffer);
-            res = res + buffer;
-        }
-        file.close();
-        return res;
+        return !(string(main).find(string(sub)) == STRING_NO_FOUND);
     }
     catch (...)
     {
-        return "";
+        return false;
     }
 }
+
+// different type text compare
+template <typename TEXT_TYPE_1, typename TEXT_TYPE_2>
+bool is_sub(TEXT_TYPE_1 main, TEXT_TYPE_2 sub)
+{
+    if (text_size(main) < text_size(sub))
+    {
+        return false;
+    }
+
+    try
+    {
+        return !(string(main).find(string(sub)) == STRING_NO_FOUND);
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
+#endif
