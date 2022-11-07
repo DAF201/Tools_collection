@@ -1,0 +1,6 @@
+﻿  pch.cpp
+  dllmain.cpp
+  PY_DLL.cpp
+  Generating Code...
+     Creating library C:\Users\daf20\Documents\GitHub\Tools_collection\Hybrid_Programming\Python_CPP\PY_DLL\x64\Debug\PYDLL.lib and object C:\Users\daf20\Documents\GitHub\Tools_collection\Hybrid_Programming\Python_CPP\PY_DLL\x64\Debug\PYDLL.exp
+  PY_DLL.vcxproj -> C:\Users\daf20\Documents\GitHub\Tools_collection\Hybrid_Programming\Python_CPP\PY_DLL\x64\Debug\PYDLL.dll
