@@ -1,5 +1,5 @@
 mixed: main.o head.o
-	cc -o mixed main.o head.o -lstdc++ 
+	gcc -o mixed main.o head.o -lstdc++ 
 main.o: main.c
 	gcc -c main.c -o main.o
 head.o:
