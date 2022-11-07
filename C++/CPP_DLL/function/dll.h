@@ -1,4 +1,3 @@
-/* file: dll.h */
 #ifndef __dll_h__
 #define __dll_h__
 #ifndef DLL_EXPORT
