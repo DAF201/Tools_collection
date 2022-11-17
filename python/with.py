@@ -15,6 +15,9 @@ def get_sample():
 with get_sample() as sample:
     print("sample:", sample)
 
+with Sample() as sample:#this work the same
+    print("sample:", sample)    
+    
 # output
 # In __enter__()
 #sample: Foo
