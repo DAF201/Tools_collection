@@ -48,3 +48,38 @@ task2 -> task3 -> task1 remaining
 
 I will rather use threading and taskqueue...
 '''
+
+
+import time
+import asyncio
+
+
+async def test_function_1():
+    await asyncio.sleep(5)
+    print(1)
+
+
+async def test_function_2():
+    await asyncio.sleep(5)
+    print(2)
+
+
+async def test_function_3():
+    await asyncio.sleep(5)
+    print(3)
+
+start = time.time()
+loop = asyncio.get_event_loop()
+task = [asyncio.ensure_future(x)
+        for x in (test_function_1(), test_function_2(), test_function_3())]
+loop.run_until_complete(asyncio.wait(task))
+end = time.time()
+print(end-start)
+
+'''
+1
+2
+3
+5.000494956970215
+5s rather than 15s, because they will not block eachother
+'''
