@@ -81,5 +81,5 @@ print(end-start)
 2
 3
 5.000494956970215
-5s rather than 15s, because they will not block eachother
+5s rather than 15s, because they will not block eachother(but I still feel like this is not that useful)
 '''
