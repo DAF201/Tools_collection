@@ -49,4 +49,6 @@ int main()
     std::cout << std::hex << modbus("01039C730005") << std::endl;
     return 0;
 }
-// modbus 01 03 9C 73 00 05 5A 42
+// modbus message: 01 03 9C 73 00 05 5A 42
+// data: 01 03 9C 73 00 05
+// output: 5a42
