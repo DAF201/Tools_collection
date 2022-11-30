@@ -8,7 +8,7 @@ host(a byte) + function type(a byte) + starting register address (two bytes) + n
 >
 > 9c46
 > 
-> 001c
+> 001c(28 in hex)
 > 
 > 8b86
 
