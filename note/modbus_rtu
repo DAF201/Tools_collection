@@ -1,0 +1,6 @@
+request:
+01039c450001bb8f
+host(a byte) + function type(a byte) + starting register address (two bytes) + number of registers(two bytes) + crc (two bytes)
+
+response:
+host(a byte) + function type(a byte) + bytes size(2*number of registers) + data + crc (two bytes)
