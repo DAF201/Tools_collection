@@ -1,4 +1,5 @@
 /*
+// Java's string is just like C++, which is fixed once created... Which sounds like kind of waste to me after I knew whenever you str1+str2 is acctually creating a new string.
 public class test {
     public static void main(String[] args) {
         str a = new str();
