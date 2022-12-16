@@ -59,6 +59,9 @@ class str implements str_like {
         }
 
         if (index.length != 1) {
+            if ((index[0] > size) || (index[1] > size)) {
+                return this;
+            }
             if (index[0] > index[1]) {
                 return this;
             }
@@ -67,7 +70,13 @@ class str implements str_like {
                     buffer.remove(i);
                 }
             }
+
         } else {
+
+            if (index[0] > size) {
+                return this;
+            }
+
             for (int i = size - 1; i >= 0; i--) {
                 if (i < index[0]) {
                     buffer.remove(i);
@@ -109,19 +118,34 @@ class str implements str_like {
         return res.toString();
     }
 
-    public static void cout(str string) {
+    public static void newline() {
+        System.out.println();
+    }
 
+    void cout() {
+        System.out.println(this.to_string());
+    }
+
+    public static void cout(str string) {
+        string.cout();
+    }
+
+    public static void cout(Number num) {
+        System.out.println(num);
     }
 
     public static void cout(String string) {
-
+        System.out.println(string);
     }
 
     public static void cout(char[] string) {
-
+        System.out.println(string);
     }
 
     public static void cout(Vector<Character> string) {
-
+        for (int i = 0; i < string.size(); i++) {
+            System.out.print(string.elementAt(i));
+        }
+        System.out.println();
     }
 }
