@@ -1,3 +1,39 @@
+/*
+public class test {
+    public static void main(String[] args) {
+        str a = new str();
+        a.add("HELLO");
+        a.add(" ");
+        a.add("WORLD");
+
+        System.out.println(a.size());
+        str.cout(a.size());
+
+        System.out.println(a.to_string());
+        a.cout();
+        str.cout("HELLO WORLD");
+        char[] ch_array = { 'H', 'E', 'L', 'L', 'O', ' ', 'W', 'O', 'R', 'L', 'D' };
+        str.cout(ch_array);
+        str.cout(a);
+
+        System.out.println(a.slice(1).to_string());// this will also slice the str object same time
+        System.out.println(a.slice(1, a.size()).to_string());
+    }
+}
+
+11
+11
+HELLO WORLD
+HELLO WORLD
+HELLO WORLD
+HELLO WORLD
+HELLO WORLD
+ELLO WORLD
+LLO WORLD
+
+*/
+
+
 import java.util.Vector;
 
 interface str_like {
