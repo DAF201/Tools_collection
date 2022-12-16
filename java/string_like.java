@@ -1,35 +1,5 @@
 import java.util.Vector;
 
-public class string_like {
-    public static void main(String[] args) {
-        str a = new str();
-        a.add("Hello");
-        a.add(" ");
-        a.add("World");
-        System.out.println(a.to_string());
-        System.out.println(a.size());
-        System.out.println(a.slice(1).to_string());
-        System.out.println(a.slice(1, a.size()).to_string());
-
-    }
-
-    static void cout(str string) {
-
-    }
-
-    static void cout(String string) {
-
-    }
-
-    static void cout(char[] string) {
-
-    }
-
-    static void cout(Vector<Character> string) {
-
-    }
-}
-
 interface str_like {
     void add(String str);
 
@@ -44,6 +14,21 @@ interface str_like {
     int size();
 
     void clear();
+
+    static void cout(str string) {
+    }
+
+    static void cout(String string) {
+
+    }
+
+    static void cout(char[] string) {
+
+    }
+
+    static void cout(Vector<Character> string) {
+
+    }
 }
 
 class str implements str_like {
@@ -122,5 +107,21 @@ class str implements str_like {
             res.append(buffer.elementAt(i));
         }
         return res.toString();
+    }
+
+    public static void cout(str string) {
+
+    }
+
+    public static void cout(String string) {
+
+    }
+
+    public static void cout(char[] string) {
+
+    }
+
+    public static void cout(Vector<Character> string) {
+
     }
 }
