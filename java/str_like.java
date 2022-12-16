@@ -4,6 +4,8 @@
 // I knew there is something called stringbuilder but practice, practice!
 // Also I really don't like whenever you want to print something you have to type a function that might be even longer than the string you want to print
 
+// Not Finished
+
 public class test {
     public static void main(String[] args) {
         str a = new str();
