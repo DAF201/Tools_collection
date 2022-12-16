@@ -1,6 +1,6 @@
 import java.util.Vector;
 
-public class test {
+public class string_like {
     public static void main(String[] args) {
         str a = new str();
         a.add("Hello");
