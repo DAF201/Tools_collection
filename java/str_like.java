@@ -16,7 +16,7 @@ public class test {
         str.cout(ch_array);
         str.cout(a);
 
-        System.out.println(a.slice(1).to_string());// this will also slice the str object same time
+        System.out.println(a.slice(1).to_string());// this will also change the instance same time
         System.out.println(a.slice(1, a.size()).to_string());
     }
 }
