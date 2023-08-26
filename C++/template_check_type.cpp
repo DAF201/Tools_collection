@@ -1,9 +1,3 @@
-
-For char array, cstring, and string
-
-OUTPUT:c b a
-...
-
 template <typename T>
 bool is_sub(T &source_1)
 {
