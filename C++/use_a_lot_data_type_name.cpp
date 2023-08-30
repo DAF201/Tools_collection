@@ -1,3 +1,4 @@
+// discard, typename is really depends on machine, different machine may works differently. this is only the reference for my machine
 #include <fstream>
 #include <iostream>
 #include <vector>
