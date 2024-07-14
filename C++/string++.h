@@ -29,6 +29,19 @@ Network programming... I assume the network will not be faster than CPU with in 
 */
 typedef vector<string> str_vec;
 
+template <typename T>
+void print(T value)
+{
+    cout << value <<endl;
+}
+
+template <typename first, typename... args>
+void print(first value, args... rest)
+{
+    cout << value << endl;
+    print(rest);
+}
+
 // split string by space and dump to vector
 str_vec str_split_by_space(string input)
 {
