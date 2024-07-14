@@ -39,7 +39,7 @@ template <typename first, typename... args>
 void print(first value, args... rest)
 {
     cout << value << endl;
-    print(rest);
+    print(rest...);
 }
 
 // split string by space and dump to vector
