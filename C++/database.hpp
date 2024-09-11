@@ -1,10 +1,11 @@
 #ifndef DB_HPP
 #define DB_HPP
-#include "tools.hpp" // see the hpp about string
-#include <mariadb/conncpp.hpp> // for linux only
+#include "tools.hpp" // see the one about string
+#include <mariadb/conncpp.hpp>
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <list>
 using namespace sql;
 
 // sql database associated things
@@ -103,8 +104,9 @@ sql::ResultSet *database_execute_query(std::string target_database, std::string 
 }
 
 // resolve the result, ids are key for result,schema are types of result,bytes_size are size of each binary result
-std::map<std::string, void *> database_query_result_resolve(sql::ResultSet *result, std::string **ids, std::string schema, int *bytes_size = {0})
+std::list<std::map<std::string, void *>> database_query_result_resolve(sql::ResultSet *result, std::string **ids, std::string schema, int *bytes_size = {0})
 {
+    std::list<std::map<std::string, void *>> result_list;
     std::map<std::string, void *> res;
     // number of results
     string id;
@@ -153,7 +155,8 @@ std::map<std::string, void *> database_query_result_resolve(sql::ResultSet *resu
                 break;
             }
         }
+        result_list.push_back(res);
     }
-    return res;
+    return result_list;
 }
 #endif
