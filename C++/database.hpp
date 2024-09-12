@@ -1,6 +1,6 @@
 #ifndef DB_HPP
 #define DB_HPP
-#include "tools.hpp" // see the one about string
+#include "tools.hpp"
 #include <mariadb/conncpp.hpp>
 #include <map>
 #include <iostream>
@@ -61,6 +61,8 @@ int connect_to_db(std::map<std::string, std::string> *database_config)
         {"password", (*database_config)["PASSWORD"].c_str()},
     });
 
+    delete database_config;
+
     // connect to database
     database_connection_pointer = new std::unique_ptr<sql::Connection>(database_driver->connect(*database_url, *database_properties));
 
@@ -104,7 +106,7 @@ sql::ResultSet *database_execute_query(std::string target_database, std::string 
 }
 
 // resolve the result, ids are key for result,schema are types of result,bytes_size are size of each binary result
-std::list<std::map<std::string, void *>> database_query_result_resolve(sql::ResultSet *result, std::string **ids, std::string schema, int *bytes_size = {0})
+std::list<std::map<std::string, void *>> database_query_result_resolve(sql::ResultSet *result, std::string **ids, std::string schema)
 {
     std::list<std::map<std::string, void *>> result_list;
     std::map<std::string, void *> res;
@@ -128,7 +130,7 @@ std::list<std::map<std::string, void *>> database_query_result_resolve(sql::Resu
             {
             case 'i':
             {
-                // malloc an int
+                // new an int
                 int *buffer = new int();
                 // save result
                 *buffer = result->getInt(id);
@@ -143,20 +145,30 @@ std::list<std::map<std::string, void *>> database_query_result_resolve(sql::Resu
                 res[id] = buffer;
                 break;
             };
-            case 'b':
-            {
-                char *buffer = (char *)malloc(bytes_size[byte_index++]);
-                std::istream *binary_data = result->getBlob(id);
-                *binary_data >> buffer;
-                res[id] = buffer;
-                break;
-            };
             default:
                 break;
             }
         }
+        //push back a map
         result_list.push_back(res);
     }
+    // return a list of maps
     return result_list;
 }
+
+// free the database query result after use
+void database_query_result_recycle(std::list<std::map<std::string, void *>> result_list)
+{
+    // for each map in list
+    for (std::map<std::string, void *> &res_map : result_list)
+    {
+        // for each pair of key:value (string:void pointer)
+        for (auto const &key : res_map)
+        {
+            // free result
+            free(key.second);
+        }
+    }
+}
+
 #endif
