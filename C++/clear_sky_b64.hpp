@@ -3,7 +3,7 @@
 #include <string>
 using namespace std;
 
-//repalcement of memset since I dont want to include string.h
+// repalcement of memset since I dont want to include string.h
 void set_mem(void *p, char data, int size)
 {
     for (int i = 0; i < size; i++)
@@ -74,31 +74,35 @@ string clear_sky_b_encode(unsigned char *data, int size)
 
 __bytes clear_sky_b_decode(string data)
 {
-    // get number of paddding bytes
+    // length of padding bytes
     int pad_size = data[0] - 48;
-    // create char buffer to store result
     char *final_result_buffer = (char *)malloc((data.length() - 1) / 4 * 3);
+
     __bytes result;
+    // bytes size = (3/4)chatacter size + padding
     result.size = ((data.length() - 1) / 4 * 3) - pad_size;
-    string buffer;
+
     data = data.substr(1);
+    string buffer;
     char char_buffer[3];
-    int result_index = 0;
+
     // for each 4 characters
-    for (int i = 0; i < data.length(); i += 4)
+    for (int i = 0, j = 0; i < data.length(); i += 4)
     {
+        // get substring
         buffer = data.substr(i, i + 4);
+        // decode to 3 bytes
         char_buffer[0] = ((char_to_byte(buffer[0]) << 2) | (char_to_byte(buffer[1]) & 0b00110000) >> 4);
         char_buffer[1] = ((char_to_byte(buffer[1]) << 4) | (char_to_byte(buffer[2]) & 0b00111100) >> 2);
         char_buffer[2] = ((((char_to_byte(buffer[2])) & 0b00000011) << 6) | (char_to_byte(buffer[3]) & 0b00111111));
+
+        // write to final result
         for (int i = 0; i < 3; i++)
         {
-            final_result_buffer[result_index++] = char_buffer[i];
+            final_result_buffer[j++] = char_buffer[i];
         }
     }
-
     result.data = final_result_buffer;
-
     return result;
 }
 
