@@ -1,10 +1,9 @@
 #ifndef CODING_HPP
 #define CODING_HPP
 #include <string>
-#include <stdio.h>
-
 using namespace std;
 
+//repalcement of memset since I dont want to include string.h
 void set_mem(void *p, char data, int size)
 {
     for (int i = 0; i < size; i++)
@@ -79,6 +78,8 @@ __bytes clear_sky_b_decode(string data)
     int pad_size = data[0] - 48;
     // create char buffer to store result
     char *final_result_buffer = (char *)malloc((data.length() - 1) / 4 * 3);
+    __bytes result;
+    result.size = ((data.length() - 1) / 4 * 3) - pad_size;
     string buffer;
     data = data.substr(1);
     char char_buffer[3];
@@ -95,9 +96,9 @@ __bytes clear_sky_b_decode(string data)
             final_result_buffer[result_index++] = char_buffer[i];
         }
     }
-    __bytes result;
+
     result.data = final_result_buffer;
-    result.size = (data.length() - 1) / 4 * 3 - pad_size;
+
     return result;
 }
 
