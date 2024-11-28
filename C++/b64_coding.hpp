@@ -1,6 +1,10 @@
 #ifndef CODING_HPP
 #define CODING_HPP
+
+#ifndef TOOLS_HPP
 #include <string>
+#include <string.h>
+#endif
 
 namespace clear_sky
 {
@@ -55,11 +59,11 @@ namespace clear_sky
         }
     };
 
-    std::string encode(byte data, int size)
+    std::string encode(byte data, long unsigned int size)
     {
 
         // pad to a length divided by 3
-        int padded_length = size;
+        long int padded_length = size;
         while (padded_length % 3 != 0)
             padded_length++;
 
@@ -68,13 +72,15 @@ namespace clear_sky
         set_mem(padded_data, 0, padded_length);
 
         // number of padding bytes at front
-        std::string res;
-        res = (int2str_map[padded_length - size]);
+        // replaced string with stringstream for performance
+        std::stringstream res("");
+        res << (int2str_map[padded_length - size]);
 
         // convert 3 bytes of 8 bits to 4 bytes of 6 bits then use the index to allocate something
         // in another word, we are making 24 bits from 3 bytes of 8 bits to 4 bytes of 6 bits(but still stored as regular bytes with 2 0s in the front),
         // so the regular byte 0101 0101 will become xx xx01 and 00 0101 two bytes and so on
         for (int i = 0; i < size; i = i + 3)
+        {
             // & will extract the wanted bit at index
             // | will concatenate bits to byte
             // << and >> move things around
@@ -83,12 +89,9 @@ namespace clear_sky
             // new byte 1: 0b00 + byte 0[6:7] + byte 1[0:3]
             // new byte 2: 0b00 + byte 1[4:7] + byte 2[0:1]
             // new byte 3: 0b00 + byte 2[2:7]
-            res = res + byte2char((data[i] & 0b11111100) >> 2) +
-                  byte2char((((data[i] & 0b00000011) << 4) | ((data[i + 1] & 0b11110000) >> 4))) +
-                  byte2char(((data[i + 1] & 0b00001111) << 2) | ((data[i + 2] & 0b11000000) >> 6)) +
-                  byte2char(data[i + 2] & 0b00111111);
-
-        return res;
+            res << byte2char((data[i] & 0b11111100) >> 2) << byte2char((((data[i] & 0b00000011) << 4) | ((data[i + 1] & 0b11110000) >> 4))) << byte2char(((data[i + 1] & 0b00001111) << 2) | ((data[i + 2] & 0b11000000) >> 6)) << byte2char(data[i + 2] & 0b00111111);
+        }
+        return res.str();
     }
 
     // encoding for std::std::string only cause this thing has dynamic length and sizeof does not work on it
@@ -100,7 +103,7 @@ namespace clear_sky
     bytes decode(std::string data)
     {
         // length of padding bytes
-        int pad_size = data[0] - 48;
+        long unsigned int pad_size = data[0] - 48;
         byte decode_result = (byte)malloc((data.length() - 1) / 4 * 3);
 
         bytes result;
@@ -114,12 +117,13 @@ namespace clear_sky
         // for each 4 characters
         for (int i = 0, j = 0; i < data.length(); i += 4)
         {
+            // replaced with indexing for performance
             // get substring
-            buffer = data.substr(i, i + 4);
+            // buffer = data.substr(i, i + 4);
             // decode to 3 bytes
-            char_buffer[0] = ((char2byte(buffer[0]) << 2) | (char2byte(buffer[1]) & 0b00110000) >> 4);
-            char_buffer[1] = ((char2byte(buffer[1]) << 4) | (char2byte(buffer[2]) & 0b00111100) >> 2);
-            char_buffer[2] = ((((char2byte(buffer[2])) & 0b00000011) << 6) | (char2byte(buffer[3]) & 0b00111111));
+            char_buffer[0] = ((char2byte(data[i]) << 2) | (char2byte(data[i + 1]) & 0b00110000) >> 4);
+            char_buffer[1] = ((char2byte(data[i + 1]) << 4) | (char2byte(data[i + 2]) & 0b00111100) >> 2);
+            char_buffer[2] = ((((char2byte(data[i + 2])) & 0b00000011) << 6) | (char2byte(data[i + 3]) & 0b00111111));
 
             // write to final result
             for (int i = 0; i < 3; i++)
