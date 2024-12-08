@@ -51,9 +51,6 @@ namespace event_system
         // FUTURE USE
         int repeat;
 
-        bool finished = false;
-        bool failed = false;
-
         task() {}
 
         task(std::function<void(void *, void *)> task_body, void *return_ptr, void *param_ptr, LEVEL urgency, LEVEL importance, int repeat = 1)
@@ -70,15 +67,10 @@ namespace event_system
         {
             try
             {
-                if (repeat != INT32_MAX)
-                    repeat--;
                 func(return_ptr, param_ptr);
-                finished = true;
             }
             catch (...)
             {
-                failed = true;
-                finished = false;
                 std::rethrow_exception(std::current_exception());
             }
         }
@@ -101,6 +93,7 @@ namespace event_system
     private:
         void work()
         {
+            task t;
             while (event_system_alive)
             {
                 if (task_heap.empty())
@@ -110,12 +103,9 @@ namespace event_system
                 else
                 {
                     event_system_mutex.lock();
-
-                    task t = task_heap.top();
+                    t = task_heap.top();
                     t.exec();
                     task_heap.pop();
-                    if (t.repeat)
-                        task_heap.push(t);
                     event_system_mutex.unlock();
                 }
             }
@@ -142,15 +132,27 @@ namespace event_system
             while (event_system_alive)
             {
                 num_of_events = epoll_wait(epoll_fd, events_buffer, 1024, 500);
+
                 if (num_of_events == 0)
                     continue;
 
                 event_system_mutex.lock();
                 for (int i = 0; i < num_of_events; i++)
                 {
+
+                    // task max trigger check, if reached max repeat, remove from map and epoll
+                    if (task_map[events_buffer[i].data.fd].repeat == 0)
+                    {
+                        task_map.erase(events_buffer[i].data.fd);
+                        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events_buffer[i].data.fd, &ev);
+                        continue;
+                    }
+
+                    if (task_map[events_buffer[i].data.fd].repeat != INT32_MAX)
+                        task_map[events_buffer[i].data.fd].repeat--;
+
                     // find the task, push to heap
                     task_heap.push(task_map[events_buffer[i].data.fd]);
-                    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events_buffer[i].data.fd, &ev);
                 }
                 event_system_mutex.unlock();
             }
