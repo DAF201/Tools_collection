@@ -170,7 +170,7 @@ namespace event_system
         {
             ev.data.fd = target_fd;
             ev.events = trigger_event;
-            if (epoll_ctl(epoll_fd, trigger_event, target_fd, &ev) < 0)
+            if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, target_fd, &ev) < 0)
                 throw std::runtime_error("failed to register event!");
 
             if (task_map.count(target_fd) == 0)
