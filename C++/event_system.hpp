@@ -1,4 +1,3 @@
-// reworked, tested with pipe driver made by GPT cause I am lazy
 #ifndef EVENT_SYSTEM_HPP
 #define EVENT_SYSTEM_HPP
 
@@ -161,6 +160,7 @@ namespace event_system
         listener()
         {
             epoll_fd = epoll_create1(0);
+            printf("epoll fd: %d\n", epoll_fd);
             signal(SIGUSR1, listener::handler);
             ex = executor();
             ex.start();
@@ -180,7 +180,7 @@ namespace event_system
         static void handler(int signal)
         {
             if (signal == SIGUSR1)
-                event_system_alive == false;
+                event_system_alive = false;
         }
 
         void start()
