@@ -28,6 +28,28 @@ Network programming... I assume the network will not be faster than CPU with in 
 
 */
 typedef vector<string> str_vec;
+typedef string str;
+
+str_vec split(string original_string, string delimiter)
+{
+    int last = 0;
+    int next = 0;
+    str_vec res;
+
+    if (original_string.length() == 0)
+    {
+        return res;
+    }
+
+    while ((next = original_string.find(delimiter, last)) != string::npos)
+    {
+        res.push_back(original_string.substr(last, next - last));
+        last = next + 1;
+    }
+
+    res.push_back(original_string.substr(last));
+    return res;
+}
 
 template <typename T>
 void print(T value)
