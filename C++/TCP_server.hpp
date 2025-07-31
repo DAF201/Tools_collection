@@ -12,8 +12,6 @@
 #include <algorithm>
 #include "socket_setup.h"
 
-#define MAX_CONNECTIONS_COUNT 8
-
 #pragma comment(lib, "ws2_32.lib")
 
 using namespace std;
@@ -28,7 +26,7 @@ protected:
     // packet data, store the client information, data, and size of data
     struct socket_pkg
     {
-        char *data = nullptr;
+        unique_ptr<char[]> data;
         int size = 0;
         SOCKET client_socket;
     };
@@ -63,12 +61,12 @@ protected:
 
     void _connection_handler(SOCKET sock)
     {
-        char *buffer = new char[1056];
+        char *buffer = new char[MAX_PACKET_LENGTH];
         // TODO: do something, must notify recv_cv
         while (true)
         {
             // recv at most 1056 bytes of data at once
-            int size = recv(sock, buffer, 1056, 0);
+            int size = recv(sock, buffer, MAX_PACKET_LENGTH, 0);
             if (size == 0)
             {
                 printf("Client disconnected\n");
@@ -85,14 +83,14 @@ protected:
                 // lock the queue
                 lock_guard<mutex> lock(recv_mutex);
                 // create socket_pkg
-                char *pkg_data = new char[size];
-                memcpy(pkg_data, buffer, size);
-                socket_pkg pkg = {pkg_data, size, sock};
+                unique_ptr<char[]> pkg_data = make_unique<char[]>(size);
+                memcpy(pkg_data.get(), buffer, size);
+                socket_pkg pkg = {move(pkg_data), size, sock};
                 // insert to queue
-                recv_queue.push(pkg);
-                // notify one thread waiting
-                recv_cv.notify_one();
+                recv_queue.push(move(pkg));
             }
+            // notify one thread waiting
+            recv_cv.notify_one();
             // if need to do something else
             connection_handler(sock, buffer, size);
         }
@@ -120,7 +118,7 @@ protected:
                          { return !send_queue.empty() || stop_flag; });
             if (stop_flag)
                 break;
-            auto pkg = send_queue.front();
+            socket_pkg pkg = move(send_queue.front());
             send_queue.pop();
             lock.unlock();
 
@@ -128,7 +126,7 @@ protected:
             int sent = 0;
             while (sent < pkg.size)
             {
-                int ret = send(pkg.client_socket, pkg.data + sent, pkg.size - sent, 0);
+                int ret = send(pkg.client_socket, pkg.data.get() + sent, pkg.size - sent, 0);
                 if (ret == SOCKET_ERROR)
                 {
                     printf("Send error: %d\n", WSAGetLastError());
@@ -136,7 +134,6 @@ protected:
                 }
                 sent += ret;
             }
-            delete[] pkg.data;
         }
     }
 
@@ -213,12 +210,11 @@ public:
     virtual void send_packet(char *data, int size, SOCKET client_socket)
     {
         // push data to the packet queue, will be processed by another thread of sending
-        char *buffer = new char[size];
-        memcpy(buffer, data, size);
-        socket_pkg pkg = {buffer, size, client_socket};
+        unique_ptr<char[]> buffer = make_unique<char[]>(size);
+        memcpy(buffer.get(), data, size);
+        socket_pkg pkg = {move(buffer), size, client_socket};
         unique_lock<mutex> lock(send_mutex);
-        send_queue.push(pkg);
-        lock.unlock();
+        send_queue.push(move(pkg));
         send_cv.notify_one();
     }
 
@@ -227,11 +223,9 @@ public:
         // try to get one packet form the recv queue
         unique_lock<mutex> lock(recv_mutex);
         // wait until new data coming and notice, check if the queue is empty or server stopped
-        recv_cv.wait(lock, [this]
-                     { return !recv_queue.empty() || stop_flag; });
-        if (stop_flag && recv_queue.empty())
+        if (stop_flag || recv_queue.empty())
             return socket_pkg();
-        socket_pkg packet = recv_queue.front();
+        socket_pkg packet = move(recv_queue.front());
         recv_queue.pop();
         return packet;
     }
@@ -239,15 +233,20 @@ public:
     virtual void quit()
     {
         lock_guard<mutex> lock(connections_list_mutex);
+        if (server_listener_socket != INVALID_SOCKET)
+        {
+            shutdown(server_listener_socket, SD_BOTH);
+            closesocket(server_listener_socket);
+            server_listener_socket = INVALID_SOCKET;
+        }
         for (auto &sock : clients_connections_list)
         {
             shutdown(sock, SD_BOTH);
             closesocket(sock);
         }
         clients_connections_list.clear();
-        system("powershell -Command \"& { $client = New-Object System.Net.Sockets.TcpClient('127.0.0.1', 8000); $client.Close() }\"");
-        ACCEPT_THREAD.join();
-        SEND_THREAD.join();
+        string cmd = "powershell -Command \"& { $client = New-Object System.Net.Sockets.TcpClient('127.0.0.1', " + to_string(server_port) + "); $client.Close() }\"";
+        system(cmd.c_str());
     }
 
     virtual ~cpp_tcp_socket_server()
@@ -255,7 +254,14 @@ public:
         stop_flag = true;
         send_cv.notify_all();
         recv_cv.notify_all();
+
         quit();
+
+        if (ACCEPT_THREAD.joinable())
+            ACCEPT_THREAD.join();
+        if (SEND_THREAD.joinable())
+            SEND_THREAD.join();
+
         socket_wsa_end();
     }
 };
